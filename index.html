@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Book Store</title>
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background: linear-gradient(to right, #d7d2cc 0%, #304352 100%);
+            color: #333;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .page-container {
+            perspective: 1000px;
+        }
+
+        section {
+            background: #fff;
+            margin: 20px auto;
+            padding: 40px;
+            max-width: 1200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform-origin: center;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        section.visible {
+            opacity: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            background: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60') center/cover;
+            position: relative;
+            color: white;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            transform: translateY(30px);
+            opacity: 0;
+            transition: all 0.8s ease;
+        }
+
+        .hero.visible h1 {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.8s ease 0.2s;
+        }
+
+        .hero.visible p {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Products Section */
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            color: #2d3748;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        /* About Section */
+        .about {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 40px 20px;
+        }
+
+        .testimonial-card {
+            background: #f7fafc;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-author {
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        /* Gallery */
+        .gallery {
+            position: relative;
+            width: 100%;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .gallery-container {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 1rem;
+            /* Show scrollbar and style it */
+            scrollbar-width: thin;
+            scrollbar-color: #2d3748 #e2e8f0;
+        }
+
+        /* Webkit scrollbar styling */
+        .gallery-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .gallery-container::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .gallery-container::-webkit-scrollbar-thumb {
+            background: #2d3748;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .gallery-container::-webkit-scrollbar-thumb:hover {
+            background: #4a5568;
+        }
+
+        .gallery-item {
+            position: relative;
+            flex: 0 0 auto;
+            width: calc(33.333% - 1rem);
+            aspect-ratio: 9/16;
+            scroll-snap-align: start;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .gallery-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-hover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .gallery-item:hover .gallery-hover {
+            opacity: 1;
+        }
+
+        .gallery-item:hover .gallery-image {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                gap: 0.5rem;
+            }
+
+            .gallery-item {
+                width: 100%;
+                aspect-ratio: 1/1;
+            }
+        }
+
+        /* Contact Section */
+        .contact {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #2d3748;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #4a5568;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            margin-top: 40px;
+        }
+
+        /* Animations */
+        #home.visible {
+            animation: fadeInScale 1.2s ease-out forwards;
+        }
+
+        #products.visible {
+            animation: slideInRight 1s ease-out forwards;
+        }
+
+        #about.visible {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .testimonials.visible {
+            animation: slideInLeft 1s ease-out forwards;
+        }
+
+        .gallery.visible {
+            animation: fadeInGrid 1.2s ease-out forwards;
+        }
+
+        #contact.visible {
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInGrid {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 0.9;
+                transform: scale(1.1);
+            }
+            80% {
+                opacity: 1;
+                transform: scale(0.89);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            section {
+                padding: 20px;
+            }
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #2d3748;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        nav a:hover::after {
+            transform: scaleX(1);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#products">Products</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-container">
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Vintage Book Store</h1>
+                <p>Discover the magic of classic literature in our carefully curated collection</p>
+                <a href="#products" class="btn">Explore Collection</a>
+            </div>
+        </section>
+
+        <section id="products">
+            <h2 style="text-align: center; margin-bottom: 40px;">Featured Books</h2>
+            <div class="products">
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Book 1" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">The Great Gatsby</h3>
+                        <p>First Edition, 1925</p>
+                        <p>A masterpiece of American literature, this rare first edition captures the essence of the Jazz Age.</p>
+                        <p class="product-price">$299</p>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Book 2" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Pride and Prejudice</h3>
+                        <p>Rare Collection</p>
+                        <p>A beautifully preserved edition of Jane Austen's timeless romance, featuring original illustrations.</p>
+                        <p class="product-price">$199</p>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img src="https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Book 3" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">Moby Dick</h3>
+                        <p>Illustrated Edition</p>
+                        <p>Herman Melville's epic tale, complete with stunning period illustrations and gold-leaf details.</p>
+                        <p class="product-price">$249</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <h2>About Us</h2>
+            <p style="max-width: 800px; margin: 20px auto; line-height: 1.8;">
+                We are passionate curators of literary treasures, dedicated to preserving and sharing the beauty of vintage books. Our collection features rare editions, first prints, and carefully restored classics that bring the magic of literature to life. Each book in our collection is personally inspected and authenticated by our team of expert bibliophiles.
+            </p>
+            <p style="max-width: 800px; margin: 20px auto; line-height: 1.8;">
+                With over two decades of experience in rare book acquisition and preservation, we take pride in offering our clients not just books, but pieces of history that tell stories beyond their pages.
+            </p>
+        </section>
+
+        <section class="testimonials">
+            <div class="testimonial-card">
+                <p class="testimonial-text">"The quality of books and service is exceptional. I found a rare first edition that I've been searching for years! The condition was exactly as described, and the packaging was secure and professional."</p>
+                <p class="testimonial-author">- John Doe, Book Collector</p>
+            </div>
+            <div class="testimonial-card">
+                <p class="testimonial-text">"A treasure trove for book lovers. The collection is carefully curated and the staff is incredibly knowledgeable. Their expertise in rare books is unmatched."</p>
+                <p class="testimonial-author">- Jane Smith, Literature Professor</p>
+            </div>
+            <div class="testimonial-card">
+                <p class="testimonial-text">"The vintage books are in amazing condition. It's like stepping back in time when you open these beautiful editions. Their restoration work is impeccable."</p>
+                <p class="testimonial-author">- Mike Johnson, Antiquarian</p>
+            </div>
+        </section>
+
+        <section class="gallery">
+            <h2 style="text-align: center; margin-bottom: 40px;">Our Collection</h2>
+            <div class="gallery-container">
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1524578271613-d550eacf6090" alt="Vintage Book 1" class="gallery-image">
+                    <div class="gallery-hover">
+                        <p>First Edition Classics Collection</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1549122728-f519709caa9c" alt="Vintage Book 2" class="gallery-image">
+                    <div class="gallery-hover">
+                        <p>Rare Literature Manuscripts</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570" alt="Vintage Book 3" class="gallery-image">
+                    <div class="gallery-hover">
+                        <p>Historical Documents Collection</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1495640452828-3df6795cf69b" alt="Vintage Book 4" class="gallery-image">
+                    <div class="gallery-hover">
+                        <p>Poetry Anthologies</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1516979187457-637abb4f9353" alt="Vintage Book 5" class="gallery-image">
+                    <div class="gallery-hover">
+                        <p>Limited Edition Series</p>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8" alt="Vintage Book 6" class="gallery-image">
+                    <div class="gallery-hover">
+                        <p>Collector's Special Items</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact">
+            <h2>Contact Us</h2>
+            <p style="margin: 20px 0;">Visit our store or reach out to us for any inquiries about our collection.</p>
+            <p style="margin: 20px 0;">
+                123 Vintage Street<br>
+                Book District, BK 12345<br>
+                Tel: (555) 123-4567<br>
+                Hours: Mon-Sat 10AM-6PM
+            </p>
+            <a href="mailto:info@vintagebooks.com" class="btn">Email Us</a>
+        </section>
+
+        <footer>
+            <p>&copy; 2024 Vintage Book Store. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.2,
+            rootMargin: '0px 0px -100px 0px'
+        });
+
+        document.querySelectorAll('section').forEach((section) => {
+            observer.observe(section);
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
